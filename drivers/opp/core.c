@@ -1129,7 +1129,8 @@ struct opp_device *_add_opp_dev(const struct device *dev,
 	return opp_dev;
 }
 
-static struct opp_table *_allocate_opp_table(struct device *dev, int index)
+static struct opp_table *_allocate_opp_table(struct device *dev, int index,
+					     bool getclk)
 {
 	struct opp_table *opp_table;
 	struct opp_device *opp_dev;
@@ -1158,14 +1159,18 @@ static struct opp_table *_allocate_opp_table(struct device *dev, int index)
 
 	_of_init_opp_table(opp_table, dev, index);
 
-	/* Find clk for the device */
-	opp_table->clk = clk_get(dev, NULL);
-	if (IS_ERR(opp_table->clk)) {
-		ret = PTR_ERR(opp_table->clk);
-		if (ret == -EPROBE_DEFER)
-			goto remove_opp_dev;
+	if (getclk) {
+		/* Find clk for the device */
+		opp_table->clk = clk_get(dev, NULL);
+		if (IS_ERR(opp_table->clk)) {
+			ret = PTR_ERR(opp_table->clk);
+			if (ret == -EPROBE_DEFER)
+				goto remove_opp_dev;
 
-		dev_dbg(dev, "%s: Couldn't find clock: %d\n", __func__, ret);
+			dev_dbg(dev, "%s: Couldn't find clock: %d\n", __func__, ret);
+		}
+	} else {
+		opp_table->clk = ERR_PTR(-ENODEV);
 	}
 
 	/* Find interconnect path(s) for the device */
@@ -1214,7 +1219,8 @@ void _get_opp_table_kref(struct opp_table *opp_table)
  * uses the opp_tables_busy flag to indicate if another creator is in the middle
  * of adding an OPP table and others should wait for it to finish.
  */
-struct opp_table *_add_opp_table_indexed(struct device *dev, int index)
+struct opp_table *_add_opp_table_indexed(struct device *dev, int index,
+					 bool getclk)
 {
 	struct opp_table *opp_table;
 
@@ -1249,7 +1255,7 @@ again:
 
 		mutex_lock(&opp_table_lock);
 	} else {
-		opp_table = _allocate_opp_table(dev, index);
+		opp_table = _allocate_opp_table(dev, index, getclk);
 
 		mutex_lock(&opp_table_lock);
 		if (!IS_ERR(opp_table))
@@ -1266,7 +1272,7 @@ unlock:
 
 struct opp_table *_add_opp_table(struct device *dev)
 {
-	return _add_opp_table_indexed(dev, 0);
+	return _add_opp_table_indexed(dev, 0, true);
 }
 
 struct opp_table *dev_pm_opp_get_opp_table(struct device *dev)
