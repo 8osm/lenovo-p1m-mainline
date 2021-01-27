@@ -4,3 +4,6 @@
 [submodule "android_kernel_lenovo_P1m"]
 	path = android_kernel_lenovo_P1m
 	url = https://github.com/darklord4822/android_kernel_lenovo_P1m
+[submodule "android_device_lenovo_P1m"]
+	path = android_device_lenovo_P1m
+	url = https://github.com/darklord4822/android_device_lenovo_P1m
