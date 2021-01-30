@@ -1391,7 +1391,8 @@ dtb-$(CONFIG_ARCH_MEDIATEK) += \
 	mt7623n-bananapi-bpi-r2.dtb \
 	mt7629-rfb.dtb \
 	mt8127-moose.dtb \
-	mt8135-evbp1.dtb
+	mt8135-evbp1.dtb \
+	yl6735m_65u_ov_m.dtb
 dtb-$(CONFIG_ARCH_MILBEAUT) += milbeaut-m10v-evb.dtb
 dtb-$(CONFIG_ARCH_MSTARV7) += \
 	mstar-infinity-msc313-breadbee_crust.dtb \
